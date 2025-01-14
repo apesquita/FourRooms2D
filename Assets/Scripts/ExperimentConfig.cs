@@ -3426,7 +3426,7 @@ public class ExperimentConfig
             }
             else if (RewardLoc == 2)
             {
-                rewardPositions[trial][0] = new Vector3(3f, 1f, 0f);
+                rewardPositions[trial][0] = new Vector3(3f, 4f, 0f);
             }
             
 

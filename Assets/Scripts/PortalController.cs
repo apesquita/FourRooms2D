@@ -92,7 +92,7 @@ public class PortalController : MonoBehaviour
         // Update game state
         GameController.control.MoveCamera(destination);
         GameController.control.portalUsedBeforeTarget = true;
-        GameController.control.portalUsedType = isSecondPortal ? "second" : "first";
+        GameController.control.portalUsedType = isSecondPortal ? "bottom_left" : "top_right";
 
         // Add only one meter to the total travel distance
         GameController.control.totalTravelDistance += 1f;
