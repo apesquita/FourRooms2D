@@ -150,6 +150,7 @@ public class GameController : MonoBehaviour
     public bool FLAG_frameRateError;
     public bool FLAG_cliffFallError;
     public bool FLAG_playErrorSound = false;
+    public bool FLAG_OneStarFound;
 
     public bool blankScreen = false;            // flag for indicating whether showing a between-trial blank screen
     public bool darkTintScreen = false;         // for indicating the darkened screen tint when traversing hallways
@@ -828,6 +829,7 @@ public class GameController : MonoBehaviour
         FLAG_frameRateError = false;
         FLAG_cliffFallError = false;
         starFound = false;
+        FLAG_OneStarFound = false;
         boulderLifted = false;
         displayTimeLeft = false;
         scoreUpdated = false;
@@ -1507,6 +1509,15 @@ public class GameController : MonoBehaviour
     public void StarFound()
     {
         starFound = true; // The player has been at the star for minDwellAtReward seconds
+        
+        if (!FLAG_OneStarFound)
+        {
+            float previousDistance = totalTravelDistance;
+            totalTravelDistance += 1f;
+            Debug.Log($"StarFound() called - Distance before: {previousDistance}, after: {totalTravelDistance}");
+            FLAG_OneStarFound = true;
+        }
+        
     }
 
     // ********************************************************************** //
