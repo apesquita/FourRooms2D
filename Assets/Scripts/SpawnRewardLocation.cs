@@ -18,8 +18,8 @@ public class SpawnRewardLocation : MonoBehaviour {
         if (GameController.control.experimentVersion == "micro2D_debug_portal")
         {
             // Set fixed spawn position for debug version
-            transform.position = new Vector3(3f, 4f, 0f);
-            Debug.Log("Debug portal mode: Spawning reward at fixed position (3,4)");
+            transform.position = GameController.control.rewardSpawnLocations[rewardIndex];
+            Debug.Log($"Debug portal mode: Spawning reward at fixed position  {transform.position}");
         }
         else
         {

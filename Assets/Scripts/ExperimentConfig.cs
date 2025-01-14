@@ -37,6 +37,7 @@ public class ExperimentConfig
     private float playerZposition;
     private float rewardZposition;
     public bool[][] bridgeStates;                   // whether the 4 different bridges are ON (active) or OFF (a hole in the floor)
+    private int RewardLoc;
 
     // Control state ordering (human/computer)
     public string[][] controlStateOrder;
@@ -270,7 +271,7 @@ public class ExperimentConfig
             case "micro2D_debug_portal":            // ----Mini debugging test experiment-----
                 nDebreifQuestions = 0;
                 practiceTrials = 0 + getReadyTrial;
-                nExecutedTrials = 64;                                         // note that this is only used for the micro_debug version
+                nExecutedTrials = 2 * 64;                                         // note that this is only used for the micro_debug version
                 totalTrials = nExecutedTrials + setupAndCloseTrials + practiceTrials + nDebreifQuestions;        // accounts for the Persistent, StartScreen and Exit 'trials'
                 restFrequency = 64 + restbreakOffset;                            // Take a rest after this many normal trials
                 restbreakDuration = 5.0f;                                       // how long are the imposed rest breaks?
@@ -584,6 +585,10 @@ public class ExperimentConfig
 
             case "micro2D_debug_portal":            // ----Mini debugging test experiment-----
 
+                RewardLoc = 1;
+                nextTrial = AddTrainingBlock_micro(nextTrial, nExecutedTrials);
+                RewardLoc = 2;
+                nextTrial = RestBreakHere(nextTrial);
                 nextTrial = AddTrainingBlock_micro(nextTrial, nExecutedTrials);
                 break;
 
@@ -3415,7 +3420,15 @@ public class ExperimentConfig
 
             // Set fixed reward position
             rewardPositions[trial] = new Vector3[1];
-            rewardPositions[trial][0] = new Vector3(3f, 1f, 0f);
+            if (RewardLoc == 1)
+            {
+                rewardPositions[trial][0] = new Vector3(-3f, -4f, 0f);
+            }
+            else if (RewardLoc == 2)
+            {
+                rewardPositions[trial][0] = new Vector3(3f, 1f, 0f);
+            }
+            
 
             // Other necessary trial setup
             controlStateOrder[trial] = new string[2] { "Human", "Human" };
