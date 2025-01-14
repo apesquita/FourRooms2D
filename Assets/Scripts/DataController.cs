@@ -319,7 +319,7 @@ public class DataController : MonoBehaviour {
         gameData.allTrialData[currentTrialNumber].characterSpawnLocation = GameController.control.characterSpawnLocation;
         gameData.allTrialData[currentTrialNumber].portalUsedBeforeTarget = GameController.control.portalUsedBeforeTarget;
         gameData.allTrialData[currentTrialNumber].portalUsedType = GameController.control.portalUsedType;
-        gameData.allTrialData[currentTrialNumber].totalTravelDistance = GameController.control.totalTravelDistance;
+        gameData.allTrialData[currentTrialNumber].totalTravelDistance = Mathf.Ceil(GameController.control.totalTravelDistance);
 
         // Add in the frame-by-frame data (these should be synchronized)
         if (Player != null)
