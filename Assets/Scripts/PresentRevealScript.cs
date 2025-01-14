@@ -12,17 +12,14 @@ public class PresentRevealScript : MonoBehaviour
     {
         if (GameController.control.experimentVersion == "micro2D_debug_portal")
         {
-            // In debug mode, only show boulder 0 at reward position
-            if (presentIndex == 0)
-            {
-                // Place boulder at reward location (3,4)
-                transform.position = new Vector3(3f, 4f, 0f);
-            }
-            else
-            {
-                // Hide all other boulders
-                gameObject.SetActive(false);
-            }
+            // In debug mode, get the current trial's reward position based on the current scene index
+            int currentTrialIndex = GameController.control.GetCurrentMapIndex();
+
+            // Ensure we're using the correct reward position for this trial
+            Vector3 rewardPosition = GameController.control.rewardSpawnLocations[0];
+
+            // Place this object at the reward location
+            transform.position = rewardPosition;
         }
         else
         {
