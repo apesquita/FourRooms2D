@@ -15,7 +15,7 @@ public class SpawnRewardLocation : MonoBehaviour {
 
     void Start()
     {
-        if (GameController.control.experimentVersion == "micro2D_debug_portal")
+        if (GameController.control.experimentVersion == "nav2D_teleporter")
         {
             // Set fixed spawn position for debug version
             transform.position = GameController.control.rewardSpawnLocations[rewardIndex];

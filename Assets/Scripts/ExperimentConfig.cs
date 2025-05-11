@@ -128,11 +128,12 @@ public class ExperimentConfig
     {
         // Experiments with training blocked by context
 
-        
-        //experimentVersion = "nav2D_reversal_2cues";
+        //TASKS PROGRAMMED BY ANA PESQUITA////////////
         //experimentVersion = "nav2D_probablistic";
-        experimentVersion = "micro2D_debug_portal";
+        //experimentVersion = "nav2D_reversal_2cues";
         //experimentVersion = "nav2D_separation";
+        experimentVersion = "nav2D_teleporter";
+        ////////////////////////////////////////////////
 
         //experimentVersion = "mturk2D_cheesewatermelon";     // ***HRS note that if you do wacky colours youll have to change the debrief question text which mentions room colours
         //experimentVersion = "mturk2D_day3_intermingled";
@@ -268,13 +269,15 @@ public class ExperimentConfig
                 wackyColours = true;
                 break;
 
-            case "micro2D_debug_portal":            // ----Mini debugging test experiment-----
+            case "nav2D_teleporter":            // ----Mini debugging test experiment-----
                 nDebreifQuestions = 0;
                 practiceTrials = 0 + getReadyTrial;
-                nExecutedTrials = 2 * 64;                                         // note that this is only used for the micro_debug version
-                totalTrials = nExecutedTrials + setupAndCloseTrials + practiceTrials + nDebreifQuestions;        // accounts for the Persistent, StartScreen and Exit 'trials'
-                restFrequency = 64 + restbreakOffset;                            // Take a rest after this many normal trials
-                restbreakDuration = 5.0f;                                       // how long are the imposed rest breaks?
+                // Each block has nExecutedTrials trials, and we need 4 blocks + 3 rest breaks
+                nExecutedTrials = 28;  
+                                      // Total trials needed = 4 blocks × 2 trials per block + setup/close trials + practice + debrief
+                totalTrials = (nExecutedTrials * 4) + setupAndCloseTrials + practiceTrials + nDebreifQuestions;
+                restFrequency = 28 + restbreakOffset;  // Take a rest after this many normal trials
+                restbreakDuration = 5.0f;                 // how long are the imposed rest breaks?
                 transferCounterbalance = false;
                 break;
 
@@ -384,7 +387,6 @@ public class ExperimentConfig
 
                 nextTrial = AddRevLearnBlock_v1(nextTrial);
                 nextTrial = RestBreakHere(nextTrial);
-
                 nextTrial = AddRevLearnBlock_v1(nextTrial);
               
                 break;
@@ -394,30 +396,32 @@ public class ExperimentConfig
                 Debug.Log("Inside the experimentVersion");
 
                 //----Training block 1
-                nextTrial = AddTrainingBlock_v2(nextTrial);
+                nextTrial = AddTrainingBlock_v2(nextTrial); //32 trials
+                nextTrial = RestBreakHere(nextTrial);
 
                 //---- training block 2
-                nextTrial = AddTrainingBlock_v2(nextTrial);
+                nextTrial = AddTrainingBlock_v2(nextTrial); //32 trials
                 nextTrial = RestBreakHere(nextTrial);
 
                 ////---- testing block 1
-                nextTrial = AddTestingBlock_v2(nextTrial);
+                nextTrial = AddTestingBlock_v2(nextTrial); //16 trials
 
                 ////---- testing block 2
-                nextTrial = AddTestingBlock_v2_switch(nextTrial);
-
-                ////---- testing block 3
-                nextTrial = AddTestingBlock_v2(nextTrial);
-
-                ////---- testing block 4
-                nextTrial = AddTestingBlock_v2_switch(nextTrial);
+                nextTrial = AddTestingBlock_v2_switch(nextTrial); // 16 trials
                 nextTrial = RestBreakHere(nextTrial);
 
                 ////---- testing block 3
-                nextTrial = AddTestingBlock_v2(nextTrial);
+                nextTrial = AddTestingBlock_v2(nextTrial);//16 trials
 
                 ////---- testing block 4
                 nextTrial = AddTestingBlock_v2_switch(nextTrial);
+                nextTrial = RestBreakHere(nextTrial);//16 trials
+
+                ////---- testing block 3
+                nextTrial = AddTestingBlock_v2(nextTrial); //16 trials
+
+                ////---- testing block 4
+                nextTrial = AddTestingBlock_v2_switch(nextTrial);//16 trials
 
 
 
@@ -583,13 +587,54 @@ public class ExperimentConfig
 
                 break;
 
-            case "micro2D_debug_portal":            // ----Mini debugging test experiment-----
+            case "nav2D_teleporter":            // ----Mini debugging test experiment-----
+                Debug.Log("nav2D_teleporter case - nExecutedTrials: " + nExecutedTrials);
+                Debug.Log("nav2D_teleporter case - totalTrials: " + totalTrials);
 
-                RewardLoc = 1;
-                nextTrial = AddTrainingBlock_micro(nextTrial, nExecutedTrials);
-                RewardLoc = 2;
-                nextTrial = RestBreakHere(nextTrial);
-                nextTrial = AddTrainingBlock_micro(nextTrial, nExecutedTrials);
+                // Calculate how many trials we need for all blocks and rest breaks
+                int totalNeededTrials = (nExecutedTrials * 4); // 4 blocks + 3 rest breaks
+
+                if (totalNeededTrials > totalTrials - setupAndCloseTrials - practiceTrials - nDebreifQuestions)
+                {
+                    Debug.LogError("Not enough trial slots for requested sequence. Need: " + totalNeededTrials +
+                                   ", Available: " + (totalTrials - setupAndCloseTrials - practiceTrials - nDebreifQuestions));
+                }
+                else
+                {
+                    int currentTrialIndex = nextTrial;
+
+                    // Block A (first)
+                    Debug.Log("Adding Block A at trial index: " + currentTrialIndex);
+                    AddPortalBlock_A(currentTrialIndex, nExecutedTrials);
+                    currentTrialIndex += nExecutedTrials;
+
+                    // Rest break 1
+                    Debug.Log("Adding rest break 1 at trial index: " + currentTrialIndex);
+                    currentTrialIndex = RestBreakHere(currentTrialIndex);
+
+                    // Block B (first)
+                    Debug.Log("Adding Block B at trial index: " + currentTrialIndex);
+                    AddPortalBlock_B(currentTrialIndex, nExecutedTrials);
+                    currentTrialIndex += nExecutedTrials;
+
+                    // Rest break 2
+                    Debug.Log("Adding rest break 2 at trial index: " + currentTrialIndex);
+                    currentTrialIndex = RestBreakHere(currentTrialIndex);
+
+                    // Block A (second)
+                    Debug.Log("Adding Block A again at trial index: " + currentTrialIndex);
+                    AddPortalBlock_A(currentTrialIndex, nExecutedTrials);
+                    currentTrialIndex += nExecutedTrials;
+
+                    // Rest break 3
+                    Debug.Log("Adding rest break 3 at trial index: " + currentTrialIndex);
+                    currentTrialIndex = RestBreakHere(currentTrialIndex);
+
+                    // Block B (second)
+                    Debug.Log("Adding Block B again at trial index: " + currentTrialIndex);
+                    AddPortalBlock_B(currentTrialIndex, nExecutedTrials);
+                }
+
                 break;
 
             default:
@@ -1198,8 +1243,21 @@ public class ExperimentConfig
     private int RestBreakHere(int firstTrial)
     {
         // Insert a rest break here and move to the next trial in the sequence
+        Debug.Log("Entered rest function");
+        Debug.Log("firstTrial");
+        Debug.Log(firstTrial);
+
+        // Check array bounds
+        if (firstTrial < 0 || firstTrial >= trialMazes.Length)
+        {
+            Debug.LogError("RestBreakHere: Index out of range. Max: " + (trialMazes.Length - 1) + ", Requested: " + firstTrial);
+            return firstTrial; // Return the same index to prevent further errors
+        }
 
         trialMazes[firstTrial] = "RestBreak";
+        Debug.Log("Passed trialMazes");
+        Debug.Log(trialMazes[firstTrial]);
+
         return firstTrial + 1;
     }
 
@@ -1475,16 +1533,37 @@ public class ExperimentConfig
     }
     // ********************************************************************** //
 
-    private int AddTrainingBlock_micro(int nextTrial, int numberOfTrials)
+    private void AddPortalBlock_B(int firstTrial, int numberOfTrials)
     {
-        if (experimentVersion == "micro2D_debug_portal")
+        Debug.Log("AddPortalBlock_B - Starting at trial: " + firstTrial);
+
+        // Check for array bounds
+        if (firstTrial + numberOfTrials > trialMazes.Length)
         {
-            GeneratePortalTrialSequence(nextTrial, 64); // Generate 64 trials with new spawn system
-            return nextTrial + 64;
+            Debug.LogError("Trial index exceeds array bounds. Max: " + (trialMazes.Length - 1) + ", Requested: " + (firstTrial + numberOfTrials - 1));
+            return;
         }
-        else
+
+        if (experimentVersion == "nav2D_teleporter")
         {
-            return SingleRewardBlock_micro(nextTrial, "mushroom", 0, numberOfTrials);
+            GeneratePortalTrialSequence_B(firstTrial, numberOfTrials);
+        }
+    }
+
+    private void AddPortalBlock_A(int firstTrial, int numberOfTrials)
+    {
+        Debug.Log("AddPortalBlock_A - Starting at trial: " + firstTrial);
+
+        // Check for array bounds
+        if (firstTrial + numberOfTrials > trialMazes.Length)
+        {
+            Debug.LogError("Trial index exceeds array bounds. Max: " + (trialMazes.Length - 1) + ", Requested: " + (firstTrial + numberOfTrials - 1));
+            return;
+        }
+
+        if (experimentVersion == "nav2D_teleporter")
+        {
+            GeneratePortalTrialSequence_A(firstTrial, numberOfTrials);
         }
     }
     // ********************************************************************** //
@@ -2425,7 +2504,7 @@ public class ExperimentConfig
             // Write the trial according to context and room/start locations
             rewardTypes[trial] = context;
 
-            if (experimentVersion == "micro2D_debug_portal")
+            if (experimentVersion == "nav2D_teleporter")
             {
                 // Debug mode - single reward setup
                 doubleRewardTask[trial] = false;
@@ -2442,7 +2521,7 @@ public class ExperimentConfig
             // Generate present positions (keep this for boulder positioning)
             GeneratePresentPositions(trial, trialInBlock, freeForageFLAG);
 
-            if (!experimentVersion.Equals("micro2D_debug_portal"))
+            if (!experimentVersion.Equals("nav2D_teleporter"))
             {
                 // Original reward positioning logic for non-debug mode
                 if (freeForageFLAG)
@@ -3352,7 +3431,629 @@ public class ExperimentConfig
     }
 
     // ********************************************************************** //
+    private List<Vector3> Generate_SpawnPos_B_Portal_Room()
+    {
+        List<Vector3> possibleSpawnPositions_B_Portal_Room = new List<Vector3>
+    {
+        new Vector3(-1, -1, playerZposition),
+        new Vector3(-1, -2, playerZposition),
+        new Vector3(-1, -3, playerZposition),
+        new Vector3(-1, -4, playerZposition),
+        new Vector3(-2, -1, playerZposition),
+        new Vector3(-2, -2, playerZposition),
+        new Vector3(-2, -3, playerZposition),
+        new Vector3(-2, -4, playerZposition),
+        new Vector3(-3, -1, playerZposition),
+        new Vector3(-3, -2, playerZposition),
+        new Vector3(-3, -3, playerZposition),
+        new Vector3(-3, -4, playerZposition),
+        new Vector3(-4, -1, playerZposition),
+        new Vector3(-4, -2, playerZposition),
+        new Vector3(-4, -3, playerZposition),
+        new Vector3(-4, -4, playerZposition)
+    };
 
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_B_Portal_Room = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_B_Portal_Room.Count < 2)
+        {
+            return possibleSpawnPositions_B_Portal_Room; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_B_Portal_Room.Count);
+            selectedSpawnPositions_B_Portal_Room.Add(possibleSpawnPositions_B_Portal_Room[randomIndex]);
+            possibleSpawnPositions_B_Portal_Room.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        return selectedSpawnPositions_B_Portal_Room;
+    }
+    // ********************************************************************** //
+
+    // ********************************************************************** //
+    private List<Vector3> Generate_SpawnPos_B_Reward_Room()
+    {
+        List<Vector3> possibleSpawnPositions_B_Reward_Room = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(1, 1, playerZposition),
+        new Vector3(1, 2, playerZposition),
+        new Vector3(1, 3, playerZposition),
+        new Vector3(1, 4, playerZposition),
+        new Vector3(2, 1, playerZposition),
+        new Vector3(2, 2, playerZposition),
+        new Vector3(2, 3, playerZposition),
+        new Vector3(2, 4, playerZposition),
+        new Vector3(3, 1, playerZposition),
+        new Vector3(3, 2, playerZposition),
+        new Vector3(3, 3, playerZposition),
+        new Vector3(3, 4, playerZposition),
+        new Vector3(4, 1, playerZposition),
+        new Vector3(4, 2, playerZposition),
+        new Vector3(4, 3, playerZposition),
+        new Vector3(4, 4, playerZposition)
+    };
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_B_Reward_Room = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_B_Reward_Room.Count < 2)
+        {
+            return possibleSpawnPositions_B_Reward_Room; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_B_Reward_Room.Count);
+            selectedSpawnPositions_B_Reward_Room.Add(possibleSpawnPositions_B_Reward_Room[randomIndex]);
+            possibleSpawnPositions_B_Reward_Room.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        return selectedSpawnPositions_B_Reward_Room;
+    }
+    // ********************************************************************** //
+
+
+    // ********************************************************************** //
+    private List<Vector3> Generate_SpawnPos_A_Reward_Room()
+    {
+        List<Vector3> possibleSpawnPositions_A_Reward_Room = new List<Vector3>
+    {
+        new Vector3(-1, -1, playerZposition),
+        new Vector3(-1, -2, playerZposition),
+        new Vector3(-1, -3, playerZposition),
+        new Vector3(-1, -4, playerZposition),
+        new Vector3(-2, -1, playerZposition),
+        new Vector3(-2, -2, playerZposition),
+        new Vector3(-2, -3, playerZposition),
+        new Vector3(-2, -4, playerZposition),
+        new Vector3(-3, -1, playerZposition),
+        new Vector3(-3, -2, playerZposition),
+        new Vector3(-3, -3, playerZposition),
+        new Vector3(-3, -4, playerZposition),
+        new Vector3(-4, -1, playerZposition),
+        new Vector3(-4, -2, playerZposition),
+        new Vector3(-4, -3, playerZposition),
+        new Vector3(-4, -4, playerZposition)
+    };
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_A_Reward_Room = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_A_Reward_Room.Count < 2)
+        {
+            return possibleSpawnPositions_A_Reward_Room; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_A_Reward_Room.Count);
+            selectedSpawnPositions_A_Reward_Room.Add(possibleSpawnPositions_A_Reward_Room[randomIndex]);
+            possibleSpawnPositions_A_Reward_Room.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        return selectedSpawnPositions_A_Reward_Room;
+    }
+    // ********************************************************************** //
+
+    // ********************************************************************** //
+    private List<Vector3> Generate_SpawnPos_A_Portal_Room()
+    {
+        List<Vector3> possibleSpawnPositions_A_Portal_Room = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(1, 1, playerZposition),
+        new Vector3(1, 2, playerZposition),
+        new Vector3(1, 3, playerZposition),
+        new Vector3(1, 4, playerZposition),
+        new Vector3(2, 1, playerZposition),
+        new Vector3(2, 2, playerZposition),
+        new Vector3(2, 3, playerZposition),
+        new Vector3(2, 4, playerZposition),
+        new Vector3(3, 1, playerZposition),
+        new Vector3(3, 2, playerZposition),
+        new Vector3(3, 3, playerZposition),
+        new Vector3(3, 4, playerZposition),
+        new Vector3(4, 1, playerZposition),
+        new Vector3(4, 2, playerZposition),
+        new Vector3(4, 3, playerZposition),
+        new Vector3(4, 4, playerZposition)
+    };
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_A_Portal_Room = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_A_Portal_Room.Count < 2)
+        {
+            return possibleSpawnPositions_A_Portal_Room; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_A_Portal_Room.Count);
+            selectedSpawnPositions_A_Portal_Room.Add(possibleSpawnPositions_A_Portal_Room[randomIndex]);
+            possibleSpawnPositions_A_Portal_Room.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        return selectedSpawnPositions_A_Portal_Room;
+    }
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_A_TopLeft_Green()
+    {
+        List<Vector3> possibleSpawnPositions_A_TopLeft_Green = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(-2, 4, playerZposition),
+        new Vector3(-2, 3, playerZposition),
+        new Vector3(-1, 4, playerZposition),
+        new Vector3(-1, 3, playerZposition),
+        new Vector3(-1, 2, playerZposition)
+    };
+        Debug.Log($"A_TopLeft_Green has {possibleSpawnPositions_A_TopLeft_Green.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_A_TopLeft_Green = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_A_TopLeft_Green.Count < 2)
+        {
+            return possibleSpawnPositions_A_TopLeft_Green; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_A_TopLeft_Green.Count);
+            selectedSpawnPositions_A_TopLeft_Green.Add(possibleSpawnPositions_A_TopLeft_Green[randomIndex]);
+            possibleSpawnPositions_A_TopLeft_Green.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_A_TopLeft_Green.Count} positions from A_TopLeft_Green");
+        return selectedSpawnPositions_A_TopLeft_Green;
+    }
+
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_B_TopLeft_Green()
+    {
+        List<Vector3> possibleSpawnPositions_B_TopLeft_Green = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(-4, 1, playerZposition),
+        new Vector3(-3, 1, playerZposition)
+    };
+        Debug.Log($"B_TopLeft_Green has {possibleSpawnPositions_B_TopLeft_Green.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_B_TopLeft_Green = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_B_TopLeft_Green.Count < 2)
+        {
+            return possibleSpawnPositions_B_TopLeft_Green; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_B_TopLeft_Green.Count);
+            selectedSpawnPositions_B_TopLeft_Green.Add(possibleSpawnPositions_B_TopLeft_Green[randomIndex]);
+            possibleSpawnPositions_B_TopLeft_Green.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_B_TopLeft_Green.Count} positions from B_TopLeft_Green");
+        return selectedSpawnPositions_B_TopLeft_Green;
+    }
+
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_A_TopLeft_Red()
+    {
+        List<Vector3> possibleSpawnPositions_A_TopLeft_Red = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(-4, 2, playerZposition),
+        new Vector3(-4, 1, playerZposition),
+        new Vector3(-3, 2, playerZposition),
+        new Vector3(-3, 1, playerZposition),
+        new Vector3(-2, 1, playerZposition)
+    };
+        Debug.Log($"A_TopLeft_Red has {possibleSpawnPositions_A_TopLeft_Red.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_A_TopLeft_Red = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_A_TopLeft_Red.Count < 2)
+        {
+            return possibleSpawnPositions_A_TopLeft_Red; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_A_TopLeft_Red.Count);
+            selectedSpawnPositions_A_TopLeft_Red.Add(possibleSpawnPositions_A_TopLeft_Red[randomIndex]);
+            possibleSpawnPositions_A_TopLeft_Red.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_A_TopLeft_Red.Count} positions from A_TopLeft_Red");
+        return selectedSpawnPositions_A_TopLeft_Red;
+    }
+
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_B_TopLeft_Red()
+    {
+        List<Vector3> possibleSpawnPositions_B_TopLeft_Red = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(-4, 4, playerZposition),
+        new Vector3(-3, 4, playerZposition),
+        new Vector3(-2, 4, playerZposition),
+        new Vector3(-1, 4, playerZposition),
+        new Vector3(-2, 3, playerZposition),
+        new Vector3(-1, 3, playerZposition),
+        new Vector3(-2, 2, playerZposition),
+        new Vector3(-2, 1, playerZposition),
+        new Vector3(-1, 1, playerZposition)
+    };
+        Debug.Log($"B_TopLeft_Red has {possibleSpawnPositions_B_TopLeft_Red.Count} potential positions");
+
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_B_TopLeft_Red = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_B_TopLeft_Red.Count < 2)
+        {
+            return possibleSpawnPositions_B_TopLeft_Red; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_B_TopLeft_Red.Count);
+            selectedSpawnPositions_B_TopLeft_Red.Add(possibleSpawnPositions_B_TopLeft_Red[randomIndex]);
+            possibleSpawnPositions_B_TopLeft_Red.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_B_TopLeft_Red.Count} positions from B_TopLeft_Red");
+        return selectedSpawnPositions_B_TopLeft_Red;
+    }
+
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_A_TopLeft_White()
+    {
+        List<Vector3> possibleSpawnPositions_A_TopLeft_White = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(-4, 4, playerZposition),
+        new Vector3(-4, 3, playerZposition),
+        new Vector3(-3, 4, playerZposition),
+        new Vector3(-3, 3, playerZposition),
+        new Vector3(-1, 1, playerZposition)
+    };
+        Debug.Log($"A_TopLeft_White has {possibleSpawnPositions_A_TopLeft_White.Count} potential positions");
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_A_TopLeft_White = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_A_TopLeft_White.Count < 2)
+        {
+            return possibleSpawnPositions_A_TopLeft_White; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_A_TopLeft_White.Count);
+            selectedSpawnPositions_A_TopLeft_White.Add(possibleSpawnPositions_A_TopLeft_White[randomIndex]);
+            possibleSpawnPositions_A_TopLeft_White.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_A_TopLeft_White.Count} positions from A_TopLeft_White");
+        return selectedSpawnPositions_A_TopLeft_White;
+    }
+
+
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_B_TopLeft_White()
+    {
+        List<Vector3> possibleSpawnPositions_B_TopLeft_White = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(-4, 2, playerZposition),
+        new Vector3(-3, 2, playerZposition),
+        new Vector3(-2, 1, playerZposition)
+    };
+        Debug.Log($"B_TopLeft_White has {possibleSpawnPositions_B_TopLeft_White.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_B_TopLeft_White = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_B_TopLeft_White.Count < 2)
+        {
+            return possibleSpawnPositions_B_TopLeft_White; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_B_TopLeft_White.Count);
+            selectedSpawnPositions_B_TopLeft_White.Add(possibleSpawnPositions_B_TopLeft_White[randomIndex]);
+            possibleSpawnPositions_B_TopLeft_White.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_B_TopLeft_White.Count} positions from B_TopLeft_White");
+        return selectedSpawnPositions_B_TopLeft_White;
+    }
+
+
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_A_BotRig_Green()
+    {
+        List<Vector3> possibleSpawnPositions_A_BotRig_Green = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(2, -1, playerZposition),
+        new Vector3(3, -1, playerZposition),
+        new Vector3(4, -1, playerZposition),
+        new Vector3(3, -2, playerZposition),
+        new Vector3(4, -2, playerZposition)
+    };
+        Debug.Log($"A_BotRig_Green has {possibleSpawnPositions_A_BotRig_Green.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_A_BotRig_Green = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_A_BotRig_Green.Count < 2)
+        {
+            return possibleSpawnPositions_A_BotRig_Green; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_A_BotRig_Green.Count);
+            selectedSpawnPositions_A_BotRig_Green.Add(possibleSpawnPositions_A_BotRig_Green[randomIndex]);
+            possibleSpawnPositions_A_BotRig_Green.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_A_BotRig_Green.Count} positions from A_BotRig_Green");
+        return selectedSpawnPositions_A_BotRig_Green;
+    }
+
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_B_BotRig_Green()
+    {
+        List<Vector3> possibleSpawnPositions_B_BotRig_Green = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(1, -2, playerZposition),
+        new Vector3(1, -3, playerZposition),
+        new Vector3(2, -3, playerZposition),
+        new Vector3(1, -4, playerZposition),
+        new Vector3(2, -4, playerZposition)
+    };
+        Debug.Log($"B_BotRig_Green has {possibleSpawnPositions_B_BotRig_Green.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_B_BotRig_Green = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_B_BotRig_Green.Count < 2)
+        {
+            return possibleSpawnPositions_B_BotRig_Green; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_B_BotRig_Green.Count);
+            selectedSpawnPositions_B_BotRig_Green.Add(possibleSpawnPositions_B_BotRig_Green[randomIndex]);
+            possibleSpawnPositions_B_BotRig_Green.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_B_BotRig_Green.Count} positions from B_BotRig_Green");
+        return selectedSpawnPositions_B_BotRig_Green;
+    }
+
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_A_BotRig_Red()
+    {
+        List<Vector3> possibleSpawnPositions_A_BotRig_Red = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(1, -2, playerZposition),
+        new Vector3(1, -3, playerZposition),
+        new Vector3(1, -4, playerZposition),
+        new Vector3(2, -4, playerZposition),
+        new Vector3(3, -4, playerZposition)
+    };
+        Debug.Log($"A_BotRig_Red has {possibleSpawnPositions_A_BotRig_Red.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_A_BotRig_Red = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_A_BotRig_Red.Count < 2)
+        {
+            return possibleSpawnPositions_A_BotRig_Red; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_A_BotRig_Red.Count);
+            selectedSpawnPositions_A_BotRig_Red.Add(possibleSpawnPositions_A_BotRig_Red[randomIndex]);
+            possibleSpawnPositions_A_BotRig_Red.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_A_BotRig_Red.Count} positions from A_BotRig_Red");
+        return selectedSpawnPositions_A_BotRig_Red;
+    }
+
+    // ********************************************************************** //
+
+    private List<Vector3> Generate_SpawnPos_B_BotRig_Red()
+    {
+        List<Vector3> possibleSpawnPositions_B_BotRig_Red = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(2, -1, playerZposition),
+        new Vector3(3, -1, playerZposition),
+        new Vector3(4, -1, playerZposition),
+        new Vector3(3, -2, playerZposition),
+        new Vector3(4, -2, playerZposition)
+    };
+        Debug.Log($"B_BotRig_Red has {possibleSpawnPositions_B_BotRig_Red.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_B_BotRig_Red = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_B_BotRig_Red.Count < 2)
+        {
+            return possibleSpawnPositions_B_BotRig_Red; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_B_BotRig_Red.Count);
+            selectedSpawnPositions_B_BotRig_Red.Add(possibleSpawnPositions_B_BotRig_Red[randomIndex]);
+            possibleSpawnPositions_B_BotRig_Red.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_B_BotRig_Red.Count} positions from B_BotRig_Red");
+        return selectedSpawnPositions_B_BotRig_Red;
+    }
+
+    // ********************************************************************** //
+    private List<Vector3> Generate_SpawnPos_A_BotRig_White()
+    {
+        List<Vector3> possibleSpawnPositions_A_BotRig_White = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(1, -1, playerZposition),
+        new Vector3(2, -2, playerZposition),
+        new Vector3(3, -3, playerZposition),
+        new Vector3(4, -4, playerZposition),
+    };
+        Debug.Log($"A_BotRig_White has {possibleSpawnPositions_A_BotRig_White.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_A_BotRig_White = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_A_BotRig_White.Count < 2)
+        {
+            return possibleSpawnPositions_A_BotRig_White; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_A_BotRig_White.Count);
+            selectedSpawnPositions_A_BotRig_White.Add(possibleSpawnPositions_A_BotRig_White[randomIndex]);
+            possibleSpawnPositions_A_BotRig_White.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_A_BotRig_White.Count} positions from A_BotRig_White");
+        return selectedSpawnPositions_A_BotRig_White;
+    }
+
+    // ********************************************************************** //
+    private List<Vector3> Generate_SpawnPos_B_BotRig_White()
+    {
+        List<Vector3> possibleSpawnPositions_B_BotRig_White = new List<Vector3>
+    {
+        // Top-left room (yellow) positions
+        new Vector3(1, -1, playerZposition),
+        new Vector3(2, -2, playerZposition),
+        new Vector3(3, -3, playerZposition),
+        new Vector3(4, -4, playerZposition),
+        new Vector3(3, -4, playerZposition),
+        new Vector3(4, -3, playerZposition)
+    };
+        Debug.Log($"B_BotRig_White has {possibleSpawnPositions_B_BotRig_White.Count} potential positions");
+
+        // Randomly select 4 spawn positions
+        List<Vector3> selectedSpawnPositions_B_BotRig_White = new List<Vector3>();
+        System.Random random = new System.Random();
+
+        // Make sure we have at least 4 positions to select from
+        if (possibleSpawnPositions_B_BotRig_White.Count < 2)
+        {
+            return possibleSpawnPositions_B_BotRig_White; // Return all if less than 4 available
+        }
+
+        // Select 4 random positions without duplicates
+        for (int i = 0; i < 2; i++)
+        {
+            int randomIndex = random.Next(0, possibleSpawnPositions_B_BotRig_White.Count);
+            selectedSpawnPositions_B_BotRig_White.Add(possibleSpawnPositions_B_BotRig_White[randomIndex]);
+            possibleSpawnPositions_B_BotRig_White.RemoveAt(randomIndex); // Remove to avoid duplicates
+        }
+
+        Debug.Log($"Returning {selectedSpawnPositions_B_BotRig_White.Count} positions from B_BotRig_White");
+        return selectedSpawnPositions_B_BotRig_White;
+    }
+    // ********************************************************************** //
     private List<Vector3> GenerateCornerRoomSpawnPositions()
     {
         List<Vector3> spawnPositions = new List<Vector3>();
@@ -3442,6 +4143,201 @@ public class ExperimentConfig
                 hallwayFreezeTime[trial][j] = ExponentialJitter(2f, 1.5f, 7f);
                 goalHitPauseTime[trial][j] = ExponentialJitter(2f, 1f, 5f);
             }
+        }
+    }
+
+    private void GeneratePortalTrialSequence_A(int firstTrial, int numberOfTrials)
+    {
+        // Get all spawn positions
+        List<Vector3> sel_SpawnPos_A_TopLeft_Green = Generate_SpawnPos_A_TopLeft_Green();
+        List<Vector3> sel_SpawnPos_A_TopLeft_Red = Generate_SpawnPos_A_TopLeft_Red();
+        List<Vector3> sel_SpawnPos_A_TopLeft_White = Generate_SpawnPos_A_TopLeft_White();
+        List<Vector3> sel_SpawnPos_A_BotRig_Green = Generate_SpawnPos_A_BotRig_Green();
+        List<Vector3> sel_SpawnPos_A_BotRig_Red = Generate_SpawnPos_A_BotRig_Red();
+        List<Vector3> sel_SpawnPos_A_BotRig_White = Generate_SpawnPos_A_BotRig_White();
+
+        List<Vector3> sel_SpawnPos_A_Portal_Room = Generate_SpawnPos_A_Portal_Room();
+        List<Vector3> sel_SpawnPos_A_Reward_Room = Generate_SpawnPos_A_Reward_Room();
+
+        // Create the combined list of all spawn positions
+        List<Vector3> allSpawnPositions_A = new List<Vector3>();
+
+        // Add all spawn position lists to the combined list
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_TopLeft_Green);
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_TopLeft_Green);
+
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_TopLeft_Red);
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_TopLeft_Red);
+
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_TopLeft_White);
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_TopLeft_White);
+
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_BotRig_Green);
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_BotRig_Green);
+
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_BotRig_Red);
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_BotRig_Red);
+
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_BotRig_White);
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_BotRig_White);
+
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_Portal_Room);
+        allSpawnPositions_A.AddRange(sel_SpawnPos_A_Reward_Room);
+
+        // Shuffle the combined list
+        System.Random random = new System.Random();
+        int n = allSpawnPositions_A.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = random.Next(n + 1);
+            Vector3 temp = allSpawnPositions_A[k];
+            allSpawnPositions_A[k] = allSpawnPositions_A[n];
+            allSpawnPositions_A[n] = temp;
+        }
+
+        // Set up trials
+        for (int i = 0; i < numberOfTrials; i++)
+        {
+            int trial = firstTrial + i;
+
+            // Basic trial setup
+            trialMazes[trial] = "FourRooms_mushroom";
+            doubleRewardTask[trial] = false;
+            freeForage[trial] = false;
+            maxMovementTime[trial] = 60.0f;
+            blankTime[trial] = ExponentialJitter(2.5f, 1.5f, 7f);
+
+            // Set spawn position from shuffled list
+            Vector3 spawnPos = allSpawnPositions_A[i % allSpawnPositions_A.Count];
+            playerStartPositions[trial] = spawnPos;
+
+            // Set spawn room based on position
+            if (spawnPos.x < 0)
+            {
+                playerStartRooms[trial] = "yellow"; // top-left
+            }
+            else
+            {
+                playerStartRooms[trial] = "red"; // bottom-right
+            }
+
+            // Set fixed reward position
+            rewardPositions[trial] = new Vector3[1];
+            rewardPositions[trial][0] = new Vector3(-3f, -4f, 0f);
+
+
+            // Other necessary trial setup
+            controlStateOrder[trial] = new string[2] { "Human", "Human" };
+            computerAgentCorrect[trial] = true;
+            hallwayFreezeTime[trial] = new float[4];
+            goalHitPauseTime[trial] = new float[4];
+            bridgeStates[trial] = new bool[4] { true, true, true, true };
+
+            for (int j = 0; j < 4; j++)
+            {
+                hallwayFreezeTime[trial][j] = ExponentialJitter(2f, 1.5f, 7f);
+                goalHitPauseTime[trial][j] = ExponentialJitter(2f, 1f, 5f);
+            }
+        }
+
+         
+    }
+
+    private void GeneratePortalTrialSequence_B(int firstTrial, int numberOfTrials)
+    {
+        // Get all spawn positions
+        List<Vector3> sel_SpawnPos_B_TopLeft_Green = Generate_SpawnPos_B_TopLeft_Green();
+        List<Vector3> sel_SpawnPos_B_TopLeft_Red = Generate_SpawnPos_B_TopLeft_Red();
+        List<Vector3> sel_SpawnPos_B_TopLeft_White = Generate_SpawnPos_B_TopLeft_White();
+        List<Vector3> sel_SpawnPos_B_BotRig_Green = Generate_SpawnPos_B_BotRig_Green();
+        List<Vector3> sel_SpawnPos_B_BotRig_Red = Generate_SpawnPos_B_BotRig_Red();
+        List<Vector3> sel_SpawnPos_B_BotRig_White = Generate_SpawnPos_B_BotRig_White();
+
+        List<Vector3> sel_SpawnPos_B_Portal_Room = Generate_SpawnPos_B_Portal_Room();
+        List<Vector3> sel_SpawnPos_B_Reward_Room = Generate_SpawnPos_B_Reward_Room();
+
+        // Create the combined list of all spawn positions
+        List<Vector3> allSpawnPositions_B = new List<Vector3>();
+
+        // Add all spawn position lists to the combined list
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_TopLeft_Green);
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_TopLeft_Green);
+
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_TopLeft_Red);
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_TopLeft_Red);
+
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_TopLeft_White);
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_TopLeft_White);
+
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_BotRig_Green);
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_BotRig_Green);
+
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_BotRig_Red);
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_BotRig_Red);
+
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_BotRig_White);
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_BotRig_White);
+
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_Portal_Room);
+        allSpawnPositions_B.AddRange(sel_SpawnPos_B_Reward_Room);
+
+        // Shuffle the combined list
+        System.Random random = new System.Random();
+        int n = allSpawnPositions_B.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = random.Next(n + 1);
+            Vector3 temp = allSpawnPositions_B[k];
+            allSpawnPositions_B[k] = allSpawnPositions_B[n];
+            allSpawnPositions_B[n] = temp;
+        }
+
+        // Set up trials
+        for (int i = 0; i < numberOfTrials; i++)
+        {
+            int trial = firstTrial + i;
+
+            // Basic trial setup
+            trialMazes[trial] = "FourRooms_mushroom";
+            doubleRewardTask[trial] = false;
+            freeForage[trial] = false;
+            maxMovementTime[trial] = 60.0f;
+            blankTime[trial] = ExponentialJitter(2.5f, 1.5f, 7f);
+
+            // Set spawn position from shuffled list
+            Vector3 spawnPos = allSpawnPositions_B[i % allSpawnPositions_B.Count];
+            playerStartPositions[trial] = spawnPos;
+
+            // Set spawn room based on position
+            if (spawnPos.x < 0)
+            {
+                playerStartRooms[trial] = "yellow"; // top-left
+            }
+            else
+            {
+                playerStartRooms[trial] = "red"; // bottom-right
+            }
+
+            // Set fixed reward position
+            rewardPositions[trial] = new Vector3[1];
+            rewardPositions[trial][0] = new Vector3(3f, 4f, 0f);
+
+
+            // Other necessary trial setup
+            controlStateOrder[trial] = new string[2] { "Human", "Human" };
+            computerAgentCorrect[trial] = true;
+            hallwayFreezeTime[trial] = new float[4];
+            goalHitPauseTime[trial] = new float[4];
+            bridgeStates[trial] = new bool[4] { true, true, true, true };
+
+            for (int j = 0; j < 4; j++)
+            {
+                hallwayFreezeTime[trial][j] = ExponentialJitter(2f, 1.5f, 7f);
+                goalHitPauseTime[trial][j] = ExponentialJitter(2f, 1f, 5f);
+            }
+
         }
     }
 

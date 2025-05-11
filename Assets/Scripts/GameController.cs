@@ -1457,7 +1457,7 @@ public class GameController : MonoBehaviour
                 }
 
                 // Directly update totalScore for nav2D_probablistic
-                if (experimentVersion == "nav2D_probablistic")
+                if (experimentVersion == "nav2D_probablistic" | experimentVersion == "nav2D_reversal_2cues")
                 {
                     totalScore += trialScore;
                     Debug.Log($"Trial score: {trialScore}, New total score: {totalScore}");
