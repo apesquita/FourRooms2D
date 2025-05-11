@@ -16,7 +16,7 @@ public class TotalScoreUpdateScript : MonoBehaviour
 
     void Update()
     {
-        if (gameController.experimentVersion == "micro2D_debug_portal")
+        if (gameController.experimentVersion == "nav2D_teleporter")
         {
             // Display total travel distance instead of score
             //TotalScoreMessage.text = "Total Steps";

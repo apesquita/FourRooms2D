@@ -10,7 +10,7 @@ public class PresentRevealScript : MonoBehaviour
 
     void Start()
     {
-        if (GameController.control.experimentVersion == "micro2D_debug_portal")
+        if (GameController.control.experimentVersion == "nav2D_teleporter")
         {
             // In debug mode, get the current trial's reward position based on the current scene index
             int currentTrialIndex = GameController.control.GetCurrentMapIndex();
